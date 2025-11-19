@@ -7,15 +7,6 @@
 [![bapscan-logo.png](https://i.postimg.cc/kGCR1PXD/bapscan-Typo.png)](https://postimg.cc/FdPKzqSQ)
 <br>
 
-## 📝 프로젝트 소개 (Project Overview)
-**"Bibimbap"을 "Mixed Rice"로만 이해하고 넘어가기엔 아쉽지 않나요?**
-
-밥스캔은 한국을 방문한 외국인 관광객들이 언어 장벽과 정보 부족으로 겪는 식사 주문의 어려움을 해결하기 위한 **초개인화 AI 푸드 큐레이터**입니다.
-
-단순한 텍스트 번역을 넘어, 사용자의 식습관(비건, 알레르기, 선호도)을 분석하여 **당신에게 딱 맞는 메뉴**를 추천하고, 한국 음식의 고유한 문화를 로마자 표기와 상세 설명으로 전달합니다.
-
-<br>
-
 ## 👥 Team. 강동에번쩍
 
 <table align="center">
@@ -67,6 +58,15 @@
 
 <br>
 
+## 📝 프로젝트 소개 (Project Overview)
+**"Bibimbap"을 "Mixed Rice"로만 이해하고 넘어가기엔 아쉽지 않나요?**
+
+밥스캔은 한국을 방문한 외국인 관광객들이 언어 장벽과 정보 부족으로 겪는 식사 주문의 어려움을 해결하기 위한 **초개인화 AI 푸드 큐레이터**입니다.
+
+단순한 텍스트 번역을 넘어, 사용자의 식습관(비건, 알레르기, 선호도)을 분석하여 **당신에게 딱 맞는 메뉴**를 추천하고, 한국 음식의 고유한 문화를 로마자 표기와 상세 설명으로 전달합니다.
+
+<br>
+
 ## 💡 제안 배경 및 목적
 * **🚧 언어 장벽 해소:** 외국인 관광객 1,400만 시대, 한글 메뉴판의 어려움 해결
 * **🎯 개인화 부족 해결:** 기존 번역 앱의 단순 텍스트 변환 한계 극복 (예: 육회 ≠ Six times)
@@ -94,18 +94,78 @@
 
 <br>
 
-## 🛠 기술 스택 (Tech Stack)
+## 🛠 기술 스택 및 아키텍처 (Tech Stack & Architecture)
 
-### AI & Backend
-| Tech | Description |
-| :--- | :--- |
-| **Google Gemini 2.0 Flash** | 번역, 재료 분석, 개인화 추천 로직 처리 (All-in-One 호출) |
-| **GCP Vision API** | 메뉴판 이미지 내 텍스트 및 위치 정보 실시간 추출 |
+### 시스템 아키텍처 개요
+
+BAP-SCAN은 \*\*Client (React Native) - Middleware (Python Cloud Functions) - AI API (Google)\*\*의 3단계 구조로, 보안과 효율성을 극대화합니다.
+
+  * **클라이언트:** 사용자 입력 및 UI/UX 담당.
+  * **미들웨어 (Python):** AI API 키를 보호하고, Vision 및 Gemini 호출을 통합하여 복합적인 분석 로직을 처리하는 백엔드 역할.
+  * **AI API:** 실시간 OCR, 번역, 추천 분석 수행.
+
+<br>
+
+### 기술 스택 상세
+
+| 분야 | 기술 스택 | 목적 및 활용 |
+| :--- | :--- | :--- |
+| **클라이언트 (Mobile App)** | **React Native (Expo), TypeScript, Tailwind CSS** | 크로스 플랫폼, 안정성, 일관된 UI/UX 구축. |
+| **미들웨어 (Backend)** | **Firebase Cloud Functions (Python)** | **AI API 키 보호**, Vision 및 Gemini API의 **통합 호출 로직** 처리. |
+| **AI / API** | **Google Gemini 2.0 Flash, GCP Vision API** | 핵심 분석 및 개인화 추천. |
+| **데이터 & 인증** | **Firebase Firestore, Firebase Auth** | 식습관 프리셋, 과거 주문 기록 등 데이터 영구 저장 및 사용자 인증. |
+
+<br>
+
+### 핵심 AI 통합 전략 (Python 미들웨어 기반)
+
+1.  **클라이언트 요청:** 앱이 이미지와 취향 정보를 Python Cloud Function 엔드포인트로 전송.
+2.  **Python 미들웨어:**
+      * Vision API를 호출하여 OCR 텍스트/위치 정보 추출.
+      * Firestore에서 사용자 취향 로드.
+      * **Vision 결과 + 사용자 취향 + 시스템 프롬프트**를 단일 Payload로 구성하여 Gemini 2.0 Flash에 요청 (1회 호출).
+3.  **결과 반환:** Gemini가 생성한 상세 번역 및 추천 JSON 결과를 클라이언트에 반환.
+
+<br>
 
 ### Data Source
 - **User Data:** 앱 내 사용자 입력 (취향, 알레르기 등 메타데이터)
 - **Menu Data:** 사용자 촬영 메뉴판 이미지
 - **Knowledge Base:** 위키백과 및 글로벌 요리 데이터 (세계 음식, 관광 정보)
+
+<br>
+
+## 📂 프로젝트 폴더 구조 (Project Folder Structure)
+
+```text
+/bobscan
+├── /assets 
+│   ├── /fonts         # 앱에서 사용하는 커스텀 폰트
+│   └── /images        # 로고, 아이콘, 플레이스홀더 이미지
+├── /components
+│   ├── /common        # 재사용 가능한 UI 컴포넌트 (버튼, 헤더 등)
+│   ├── /menu          # 메뉴판 분석 결과 목록 및 상세 뷰 컴포넌트
+│   └── /preference    # 취향 설정 관련 폼 컴포넌트
+├── /constants         # 정적 상수 (색상, 스타일 값, 프롬프트 템플릿)
+│   └── index.ts
+├── /context           # 전역 상태 관리 (AuthContext, UserPreferenceContext)
+├── /hooks             # 커스텀 훅 (useFirestore, useCamera, useApi)
+│   ├── useCamera.ts   # 카메라 접근 및 이미지 처리
+│   ├── useApi.ts      # Cloud Function API 호출 로직
+│   └── useFirestore.ts # Firestore CRUD 및 구독 로직
+├── /navigation        # 네비게이션 설정 (스택, 탭 등)
+├── /screens           # 개별 화면 컴포넌트
+│   ├── HomeScreen.tsx         # 메인 화면
+│   ├── ScanScreen.tsx         # 메뉴판 촬영/선택 화면
+│   ├── ResultScreen.tsx       # AI 분석 결과 화면
+│   └── PreferenceScreen.tsx   # 취향 설정 화면
+├── /services          # 외부 서비스 연동 로직 (Firebase, API)
+├── /functions         # Firebase Cloud Functions (Python)
+│   ├── main.py        # Vision & Gemini 통합 로직 구현 (Python)
+│   └── requirements.txt
+├── App.tsx            # 메인 앱 컴포넌트
+└── package.json
+```
 
 <br>
 
@@ -129,8 +189,21 @@
 
 <br>
 
+## 🗓️ 개발 단계 및 마일스톤 (Development Roadmap)
+
+| 단계 | 시간 배분 | 목표 | 핵심 기능 |
+| :--- | :--- | :--- | :--- |
+| **Phase 1: Core API & Data Setup** | 30% | 최소 기능 구현 (MVP) 및 핵심 AI 연동 성공. | **Firebase/Auth 및 Firestore 연동.** Cloud Function (Python) 환경 설정 및 클라이언트 통신. 취향 설정 저장/로드 기능 구현. |
+| **Phase 2: All-in-One AI & UI/UX** | 40% | 기획의 핵심 차별점 구현 및 사용자 인터랙션 강화. | **Python 미들웨어 로직 구현** (Vision + Gemini 통합 호출). 맞춤 추천 로직 및 메뉴판 오버레이 UI 구현. 로마자 표기 강조. |
+| **Phase 3: Finalization & Polish** | 30% | 주문 지원 기능 구현 및 발표 자료 준비. | 음성 주문 문장 생성 기능 (TTS 연동). 최종 UI/UX 디테일 및 애니메이션 보강. 코드 최적화 및 문서 완성. |
+
+<br>
+
 ## 🚀 기대 효과
 - **사회/문화적:** 알레르기 및 식습관을 고려한 안전한 식사 제공, 한국 음식의 올바른 명칭 확산
 - **경제적:** 외국인 관광객의 주문 만족도 향상 및 재방문율 증대, K-Food 브랜드 가치 상승
 
 <br>
+
+
+
