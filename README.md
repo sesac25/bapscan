@@ -2,7 +2,7 @@
 
 > **2025년 새싹 해커톤 (SeSAC Hackathon) - AI 서비스 개발**
 >
-> **초개인화 AI 메뉴판 상세 번역 및 맞춤 추천 서비스**
+> **AI 메뉴판 상세 번역 및 맞춤 추천 서비스**
 
 [![bapscan-logo.png](https://i.postimg.cc/kGCR1PXD/bapscan-Typo.png)](https://postimg.cc/FdPKzqSQ)
 <br>
