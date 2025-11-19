@@ -98,7 +98,7 @@
 
 ### 시스템 아키텍처 개요
 
-BAP-SCAN은 \*\*Client (React Native) - Middleware (Python Cloud Functions) - AI API (Google)\*\*의 3단계 구조로, 보안과 효율성을 극대화합니다.
+BAP-SCAN은 **Client** (React Native) - **Middleware** (Python Cloud Functions) - **AI API** (Google)의 3단계 구조로, 보안과 효율성을 극대화합니다.
 
   * **클라이언트:** 사용자 입력 및 UI/UX 담당.
   * **미들웨어 (Python):** AI API 키를 보호하고, Vision 및 Gemini 호출을 통합하여 복합적인 분석 로직을 처리하는 백엔드 역할.
