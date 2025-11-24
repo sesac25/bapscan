@@ -1,8 +1,11 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Modal from "react-native-modal";
+import BackButton from "../components/BackButton";
 
 export default function MenuAnalysis() {
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState(null);
 
@@ -17,6 +20,8 @@ export default function MenuAnalysis() {
 
   return (
     <View style={styles.container}>
+      <BackButton onPress={() => router.back()}/>
+      
       <Text style={styles.title}>OCR 텍스트 목록</Text>
 
       {/* OCR 텍스트 예시 */}

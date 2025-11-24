@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Button, Text, View } from "react-native";
 import styled from "styled-components/native";
+import BackButton from "../components/BackButton";
 
 export default function MenuCameraScreen() {
   const router = useRouter();
@@ -62,6 +63,9 @@ export default function MenuCameraScreen() {
 
   return (
     <Container>
+      <BackButton onPress={() => router.back()}/>
+
+
       <ThumbnailContainer>
         {images.map((uri, idx) => (
           <ThumbnailBox key={idx}>
@@ -109,6 +113,7 @@ export default function MenuCameraScreen() {
     </Container>
   );
 };
+
 
 const Container = styled.View`
   flex: 1;

@@ -21,6 +21,7 @@ const Wrapper = styled(TouchableOpacity)`
   background-color: white;
   justify-content: center;
   align-items: center;
+  z-index: 999;
 `;
 
 

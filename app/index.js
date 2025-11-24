@@ -8,7 +8,7 @@ export default function Home() {
   const theme = useTheme();
   const router = useRouter();
 
-  const [currency, setCurrency] = useState("USD")
+  const [currency, setCurrency] = useState("USD");
   const [language, setLanguage] = useState("EN");
 
   const currencySymbol = {
@@ -22,8 +22,7 @@ export default function Home() {
 
   const handleLanguageSelect = (lang) => {
     setLanguage(lang);
-    
-    // 자동 매핑
+
     if (lang === "EN") setCurrency("USD");
     if (lang === "CN") setCurrency("CNY");
     if (lang === "JP") setCurrency("JPY");
@@ -36,41 +35,80 @@ export default function Home() {
     setCurrencyModalVisible(false);
   };
 
-  // Meat (multi-select)
-  const [selectedMeat, setSelectedMeat] = useState([]);
+  /* ==============================  
+          1) Diet Style
+  ============================== */
+  const dietOptions = ["No Preference", "Vegetarian", "Vegan"];
+  const [selectedDiet, setSelectedDiet] = useState("No Preference");
 
-  // Spiciness (single-select)
-  const [selectedSpice, setSelectedSpice] = useState(null);
-
-  // Allergens (multi-select)
-  const [selectedAllergens, setSelectedAllergens] = useState([]);
-
-  const meatOptions = ["Beef", "Pork", "Chicken", "Lamb"];
+  /* ==============================  
+          2) Spiciness Level
+  ============================== */
   const spiceOptions = ["Mild", "Medium", "Spicy"];
-  const allergenOptions = [
-    ["Egg", "Milk", "Wheat", "Buckwheat"],
-    ["Mackerel", "Crab", "Shrimp", "Squid", "Shellfish"],
-    ["Soybean", "Peanut", "Peach", "Tomato"]
-  ];
+  const [selectedSpice, setSelectedSpice] = useState("Mild");
 
-  // toggle methods
-  const toggleMeat = (item) => {
-    setSelectedMeat((prev) =>
-      prev.includes(item) ? prev.filter((v) => v !== item) : [...prev, item]
-    );
+  /* ==============================  
+        3) Food Restrictions
+        dislike → cantEat → unselect
+  ============================== */
+
+  const [foodRestrictions, setFoodRestrictions] = useState({});
+
+  const toggleRestriction = (item) => {
+    setFoodRestrictions((prev) => {
+      const state = prev[item];
+
+      if (!state) return { ...prev, [item]: "dislike" }; // 1st tap
+      if (state === "dislike") return { ...prev, [item]: "cantEat" }; // 2nd tap
+
+      const updated = { ...prev }; // 3rd tap → reset
+      delete updated[item];
+      return updated;
+    });
   };
 
-  const selectSpice = (item) => setSelectedSpice(item);
-
-  const toggleAllergen = (item) => {
-    setSelectedAllergens((prev) =>
-      prev.includes(item) ? prev.filter((v) => v !== item) : [...prev, item]
-    );
+  const restrictionCategories = {
+    Meat: [
+      ["Pork",
+      "Beef",
+      "Chicken",
+      "Lamb/Goat"],
+      ["Duck",
+      "Ham/Sausage/Bacon",
+      "Intestines",
+      "Raw Meat"],
+    ],
+    Seafood: [
+      ["Fish",
+      "Raw Fish",
+      "Shellfish"],
+      ["Mollusks",
+      "Squid/Octopus",
+      "Seaweed"],
+    ],
+    "Dairy & Nuts": [
+      ["Milk/Dairy",
+      "Eggs",
+      "Peanuts"],
+      ["Sesame",
+      "Wheat",
+      "Bean"],
+    ],
+    Fruits: [
+      ["Peach",
+      "Apple",
+      "Kiwi",
+      "Banana"],
+      ["Mango",
+      "Citrus",
+      "Strawberry",
+      "Tomato"],
+    ],
   };
 
   return (
-    
     <Container>
+      {/* Currency Modal */}
       <OptionModal
         visible={currencyModalVisible}
         onClose={() => setCurrencyModalVisible(false)}
@@ -83,10 +121,11 @@ export default function Home() {
         onSelect={handleCurrencySelect}
       />
 
+      {/* Language Modal */}
       <OptionModal
         visible={languageModalVisible}
         onClose={() => setLanguageModalVisible(false)}
-        title="Lanaguage"
+        title="Language"
         options={[
           { label: "English", value: "EN" },
           { label: "Chinese", value: "CN" },
@@ -95,6 +134,7 @@ export default function Home() {
         onSelect={handleLanguageSelect}
       />
 
+      {/* Main UI */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
@@ -103,40 +143,49 @@ export default function Home() {
           paddingBottom: 120,
         }}
       >
-        
         {/* Header */}
         <Header>
           <Logo>BapScan</Logo>
+
           <HeaderRight>
             <TouchableOpacity onPress={() => setCurrencyModalVisible(true)}>
-              <CircleButton><ButtonText>{currencySymbol[currency]}</ButtonText></CircleButton>
+              <CircleButton>
+                <ButtonText>{currencySymbol[currency]}</ButtonText>
+              </CircleButton>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => setLanguageModalVisible(true)}>
-              <CircleButton><ButtonText>{language}</ButtonText></CircleButton>
+              <CircleButton>
+                <ButtonText>{language}</ButtonText>
+              </CircleButton>
             </TouchableOpacity>
           </HeaderRight>
         </Header>
 
         {/* Title */}
         <TitleContainer>
-          <MainTitle>Select foods you can't eat</MainTitle>
-          <SubTitle>We'll recommend perfect dishes for you</SubTitle>
+          <MainTitle>Select your food preferences</MainTitle>
+          <SubTitle>We will recommend the perfect dishes for you</SubTitle>
         </TitleContainer>
 
-
-        {/* ===================== */}
-        {/*        MEAT (4 grid) */}
-        {/* ===================== */}
+        {/* ================================
+              1) Diet Style
+        ================================= */}
         <Section>
-          <SectionTitle>Meat</SectionTitle>
+          <SectionTitle>Diet Style</SectionTitle>
+
           <GridRow>
-            {meatOptions.map((item) => {
-              const active = selectedMeat.includes(item);
+            {dietOptions.map((item) => {
+              const active = selectedDiet === item;
               return (
-                <TouchableOpacity key={item} onPress={() => toggleMeat(item)}>
+                <TouchableOpacity key={item} onPress={() => setSelectedDiet(item)}>
                   <GridItem>
-                    {active ? <IconCircleActive /> : <IconCircle />}
+                    {active ? (
+                      <IconCircleActive />
+                    ) : (
+                      <IconCircle />
+                    )}
+
                     {active ? (
                       <OptionLabelActive>{item}</OptionLabelActive>
                     ) : (
@@ -149,17 +198,17 @@ export default function Home() {
           </GridRow>
         </Section>
 
-
-        {/* ===================== */}
-        {/*     SPICINESS (4)     */}
-        {/* ===================== */}
+        {/* ================================
+              2) Spiciness Level
+        ================================= */}
         <Section>
-          <SectionTitle>Spiciness</SectionTitle>
+          <SectionTitle>Spiciness Level</SectionTitle>
+
           <GridRow>
             {spiceOptions.map((item) => {
               const active = selectedSpice === item;
               return (
-                <TouchableOpacity key={item} onPress={() => selectSpice(item)}>
+                <TouchableOpacity key={item} onPress={() => setSelectedSpice(item)}>
                   <GridItem>
                     {active ? <IconCircleActive /> : <IconCircle />}
                     {active ? (
@@ -174,43 +223,65 @@ export default function Home() {
           </GridRow>
         </Section>
 
-
-        {/* ===================== */}
-        {/*    ALLERGENS (3)      */}
-        {/* ===================== */}
+        {/* ================================
+              3) Food Restrictions
+        ================================= */}
         <Section>
-          <SectionTitle>Allergens</SectionTitle>
-          {allergenOptions.map((row, rowIndex) => (
-            <GridRow key={rowIndex}>
-              {row.map((item) => {
-                const active = selectedAllergens.includes(item);
-                return (
-                  <TouchableOpacity key={item} onPress={() => toggleAllergen(item)}>
-                    <GridItem>
-                      {active ? <IconCircleActive /> : <IconCircle />}
-                      {active ? (
-                        <OptionLabelActive>{item}</OptionLabelActive>
-                      ) : (
-                        <OptionLabel>{item}</OptionLabel>
-                      )}
-                    </GridItem>
-                  </TouchableOpacity>
-                );
-              })}
-            </GridRow>
+          <SectionTitle>Food Restrictions</SectionTitle>
+
+          <DescriptionText>
+            Tap once: Don’t like   ·   Tap twice: Can’t eat
+          </DescriptionText>
+
+          {Object.entries(restrictionCategories).map(([categoryName, rows]) => (
+            <Section key={categoryName}>
+              <SubCategory>{categoryName}</SubCategory>
+
+              {rows.map((row, rowIndex) => (
+                <GridRow key={rowIndex}>
+                  {row.map((item) => {
+                    const state = foodRestrictions[item];
+
+                    const strokeColor =
+                      state === "cantEat"
+                        ? theme.danger
+                        : state === "dislike"
+                        ? theme.brand
+                        : theme.lightGray;
+
+                    const textColor =
+                      state === "cantEat"
+                        ? theme.danger
+                        : state === "dislike"
+                        ? theme.brand
+                        : theme.gray;
+
+                    return (
+                      <TouchableOpacity key={item} onPress={() => toggleRestriction(item)}>
+                        <GridItem>
+                          <RestrictCircle color={strokeColor} />
+                          <OptionLabel style={{ color: textColor }}>
+                            {item}
+                          </OptionLabel>
+                        </GridItem>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </GridRow>
+              ))}
+            </Section>
           ))}
         </Section>
 
       </ScrollView>
 
       {/* Floating Button */}
-      <FloatingButton onPress={() => router.push('/MenuCameraScreen')}>
+      <FloatingButton onPress={() => router.push("/MenuCameraScreen")}>
         <FloatingText>📖</FloatingText>
       </FloatingButton>
     </Container>
   );
 }
-
 
 /* ===========================
       STYLES
@@ -281,18 +352,31 @@ const SectionTitle = styled.Text`
   color: ${({ theme }) => theme.text};
 `;
 
+const DescriptionText = styled.Text`
+  font-size: 13px;
+  color: ${({ theme }) => theme.gray};
+  margin-bottom: 6px;
+  margin-left: 4px;
+
+`;
+
+const SubCategory = styled.Text`
+  font-size: 16px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.text};
+`;
+
 const GridRow = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-evenly;
+  justify-content: space-around;
 `;
 
 const GridItem = styled.View`
-  padding: 10px 0;
+  padding: ${({ theme }) => theme.spacing(1)}px 0;
   align-items: center;
 `;
 
-/* Icon / Labels */
 const IconCircle = styled.View`
   width: 62px;
   height: 62px;
@@ -304,6 +388,15 @@ const IconCircleActive = styled(IconCircle)`
   background-color: ${({ theme }) => theme.background};
   border-width: 2px;
   border-color: ${({ theme }) => theme.brand};
+`;
+
+const RestrictCircle = styled.View`
+  width: 62px;
+  height: 62px;
+  border-radius: 31px;
+  background-color: transparent;
+  border-width: 2px;
+  border-color: ${({ color }) => color};
 `;
 
 const OptionLabel = styled.Text`
